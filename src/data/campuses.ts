@@ -1,0 +1,122 @@
+import { CampusLocationItem } from '../types.ts';
+
+export const KERALA_NEET_CAMPUSES: CampusLocationItem[] = [
+  // --- Online / Digital Option (Top 1) ---
+  {
+    id: 'online-course',
+    name: 'Online Course',
+    city: 'Online / Digital Learning',
+    tag: 'Online',
+    code: 'ONLINE',
+    address: 'Live Interactive Classes, Mobile App & Digital Portal',
+    keywords: ['online', 'online course', 'digital', 'live', 'app', 'zoom', 'e-learning', 'remote', 'hybrid', 'virtual'],
+  },
+
+  // --- Tirunelveli Branches ---
+  {
+    id: 'tvl-dayscholar',
+    name: 'Tirunelveli - Dayscholar Campus',
+    city: 'Tirunelveli',
+    tag: 'Tirunelveli',
+    code: 'TVL-1',
+    keywords: ['tirunelveli', 'dayscholar', 'day scholar', 'campus', 'nellai', 'tvl', 'tvl-1', 'tvl 1', 'tvl1'],
+  },
+  {
+    id: 'tvl-rohini',
+    name: 'Tirunelveli - Rohini Campus',
+    city: 'Tirunelveli',
+    tag: 'Tirunelveli',
+    code: 'TVL-2',
+    keywords: ['tirunelveli', 'rohini', 'campus', 'new bus stand', 'nellai', 'tvl', 'tvl-2', 'tvl 2'],
+  },
+  {
+    id: 'tvl-jeba',
+    name: 'Tirunelveli - Jeba Garden',
+    city: 'Tirunelveli',
+    tag: 'Tirunelveli',
+    code: 'TVL-3',
+    keywords: ['tirunelveli', 'jeba', 'garden', 'palayamkottai', 'bypass', 'tvl', 'tvl-3', 'tvl 3'],
+  },
+  {
+    id: 'tvl-campus6',
+    name: 'Tirunelveli - Campus 6',
+    city: 'Tirunelveli',
+    tag: 'Tirunelveli',
+    code: 'TVL-6',
+    keywords: ['tirunelveli', 'campus 6', 'campus-6', 'campus6', 'nellai', 'tvl', 'tvl-6', 'tvl 6', 'tvl6'],
+  },
+  {
+    id: 'tvl-corp',
+    name: 'Tirunelveli - Corporate Office',
+    city: 'Tirunelveli',
+    tag: 'Tirunelveli',
+    code: 'TVL-CORP-7',
+    keywords: ['tirunelveli', 'corporate', 'office', 'headquarters', 'admin', 'admissions', 'tvl', 'tvl-corp', 'tvl-7'],
+  },
+
+  // --- Regional Branches ---
+  {
+    id: 'ngl',
+    name: 'Nagercoil',
+    city: 'Nagercoil',
+    tag: 'Regional',
+    code: 'NGL',
+    keywords: ['nagercoil', 'kanyakumari', 'court road', 'ngl'],
+  },
+  {
+    id: 'svk',
+    name: 'Sivakasi',
+    city: 'Sivakasi',
+    tag: 'Regional',
+    code: 'SVK',
+    keywords: ['sivakasi', 'virudhunagar', 'sattur road', 'svk'],
+  },
+  {
+    id: 'thn',
+    name: 'Theni',
+    city: 'Theni',
+    tag: 'Regional',
+    code: 'THN',
+    keywords: ['theni', 'allinagaram', 'madurai road', 'thn'],
+  },
+  {
+    id: 'kdl',
+    name: 'Kadayanallur',
+    city: 'Kadayanallur',
+    tag: 'Regional',
+    code: 'KDL',
+    keywords: ['kadayanallur', 'tenkasi', 'kdl', 'highway'],
+  },
+  {
+    id: 'tut',
+    name: 'Thoothukudi',
+    city: 'Thoothukudi',
+    tag: 'Regional',
+    code: 'TUT',
+    keywords: ['thoothukudi', 'tuticorin', 'pearl city', 'tut', 've road'],
+  },
+  {
+    id: 'rmd',
+    name: 'Ramanathapuram',
+    city: 'Ramanathapuram',
+    tag: 'Regional',
+    code: 'RMD',
+    keywords: ['ramanathapuram', 'ramnad', 'kenikarai', 'rmd'],
+  },
+  {
+    id: 'mdu',
+    name: 'Madurai',
+    city: 'Madurai',
+    tag: 'Regional',
+    code: 'MDU',
+    keywords: ['madurai', 'kalavasal', 'bypass road', 'mdu', 'temple city'],
+  },
+  {
+    id: 'tnj',
+    name: 'Thanjavur',
+    city: 'Thanjavur',
+    tag: 'Regional',
+    code: 'TNJ',
+    keywords: ['thanjavur', 'tanjore', 'medical college road', 'tnj'],
+  },
+];

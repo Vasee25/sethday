@@ -1,0 +1,90 @@
+{
+  "entities": {
+    "Registration": {
+      "title": "Registration",
+      "description": "Student event registration pass details for STETH DAY",
+      "type": "object",
+      "properties": {
+        "studentCode": { "type": "string", "description": "Sequential student pass code e.g. KNA001" },
+        "studentName": { "type": "string", "description": "Full student name" },
+        "fatherName": { "type": "string", "description": "Father or guardian name" },
+        "email": { "type": "string", "format": "email", "description": "Student email address" },
+        "contactNumber": { "type": "string", "description": "Primary mobile contact number" },
+        "medicalCollegeName": { "type": "string", "description": "Allocated medical college" },
+        "medicalCollegeState": { "type": "string", "description": "State where medical college is located" },
+        "coatSize": { "type": "string", "description": "Apron coat size S, M, L, XL, XXL" },
+        "foodVegCount": { "type": "number", "description": "Vegetarian meal pack count" },
+        "foodNonVegCount": { "type": "number", "description": "Non-vegetarian meal pack count" },
+        "attendanceChoice": { "type": "string", "description": "Physical attendance confirmation" },
+        "photoUrl": { "type": "string", "description": "Base64 or image URL of student photo" },
+        "willingness": { "type": "string", "enum": ["WILLING", "NON_WILLING"], "description": "Participation willingness" },
+        "responseId": { "type": "string", "description": "Unique registration response ID" },
+        "campusLocation": { "type": "string", "description": "Preferred campus location" },
+        "courseProgram": { "type": "string", "description": "Enrolled program or course" },
+        "targetYear": { "type": "string", "description": "Target NEET year" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of registration" }
+      },
+      "required": ["studentName", "willingness", "responseId"]
+    },
+    "EventSettings": {
+      "title": "EventSettings",
+      "description": "Academy event configurations and badge numbering settings",
+      "type": "object",
+      "properties": {
+        "eventName": { "type": "string", "description": "Event title" },
+        "eventDate": { "type": "string", "description": "Date of event" },
+        "eventVenue": { "type": "string", "description": "Venue address" },
+        "codePrefix": { "type": "string", "description": "Student code prefix e.g. KNA" },
+        "nextCodeNumber": { "type": "number", "description": "Next sequential code number" },
+        "codeDigits": { "type": "number", "description": "Digits padding for code" },
+        "academyName": { "type": "string", "description": "Academy legal name" },
+        "pdfFooter": { "type": "string", "description": "Footer note for PDF passes" }
+      },
+      "required": ["eventName", "academyName"]
+    },
+    "MedicalCollege": {
+      "title": "MedicalCollege",
+      "description": "Government and recognized medical colleges across India",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Full official institution name" },
+        "city": { "type": "string", "description": "Campus city" },
+        "district": { "type": "string", "description": "District" },
+        "state": { "type": "string", "description": "Indian state or union territory" },
+        "type": { "type": "string", "description": "College category e.g. Government or Private" },
+        "aliases": { "type": "string", "description": "Searchable abbreviations or synonyms" }
+      },
+      "required": ["name", "city", "state"]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Authorized console administrators and station coordinators",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Full staff or administrator name" },
+        "email": { "type": "string", "format": "email", "description": "Official email address" },
+        "role": { "type": "string", "enum": ["superadmin", "staff", "food"], "description": "Assigned console permission role" },
+        "passwordHash": { "type": "string", "description": "Secure salted hash of access key" }
+      },
+      "required": ["name", "email", "role"]
+    }
+  },
+  "firestore": {
+    "/registrations/{registrationId}": {
+      "schema": "Registration",
+      "description": "Collection of student registrations"
+    },
+    "/event_settings/{settingsId}": {
+      "schema": "EventSettings",
+      "description": "Global event settings and metadata"
+    },
+    "/medical_colleges/{collegeId}": {
+      "schema": "MedicalCollege",
+      "description": "Master registry of medical colleges"
+    },
+    "/admins/{userId}": {
+      "schema": "AdminUser",
+      "description": "Credentialed portal operators and coordinators"
+    }
+  }
+}
