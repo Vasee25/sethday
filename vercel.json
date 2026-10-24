@@ -1,0 +1,28 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://kna-steth-day-backend.onrender.com/api/:path*"
+    },
+    {
+      "source": "/KNA.png",
+      "destination": "https://kna-steth-day-backend.onrender.com/KNA.png"
+    },
+    {
+      "source": "/kna.png",
+      "destination": "https://kna-steth-day-backend.onrender.com/kna.png"
+    },
+    {
+      "source": "/kna_logo_.png",
+      "destination": "https://kna-steth-day-backend.onrender.com/kna_logo_.png"
+    },
+    {
+      "source": "/kna_logo_..png",
+      "destination": "https://kna-steth-day-backend.onrender.com/kna_logo_..png"
+    },
+    {
+      "source": "/03-1.jpeg",
+      "destination": "https://kna-steth-day-backend.onrender.com/03-1.jpeg"
+    }
+  ]
+}
