@@ -112,6 +112,14 @@ export const KERALA_NEET_CAMPUSES: CampusLocationItem[] = [
     keywords: ['madurai', 'kalavasal', 'bypass road', 'mdu', 'temple city'],
   },
   {
+    id: 'cbe',
+    name: 'Coimbatore',
+    city: 'Coimbatore',
+    tag: 'Regional',
+    code: 'CBE',
+    keywords: ['coimbatore', 'Kovai', 'bypass road', 'cbe', 'temple city'],
+  },
+  {
     id: 'tnj',
     name: 'Thanjavur',
     city: 'Thanjavur',
