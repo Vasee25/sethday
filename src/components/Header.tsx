@@ -95,7 +95,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="text-center mx-auto font-extrabold text-slate-950 font-serif tracking-tight uppercase select-none leading-tight max-w-full break-words"
               style={{ fontSize: 'clamp(16px, 5.2vw, 24px)' }}
             >
-              STETH DAY REGISTRATION FORM
+              STETH DAY REGISTRATION PORTAL
             </h1>
           </div>
         </div>
