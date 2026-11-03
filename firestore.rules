@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-\\.\\@]+$');
+    }
+
+    function isValidRegistration(data) {
+      return data.studentName is string &&
+        data.studentName.size() >= 1 &&
+        data.studentName.size() <= 120 &&
+        data.willingness is string &&
+        data.willingness in ['WILLING', 'NON_WILLING'] &&
+        data.responseId is string &&
+        data.responseId.size() >= 1 &&
+        data.responseId.size() <= 100;
+    }
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Connection test document
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Registrations collection
+    match /registrations/{registrationId} {
+      allow get: if isValidId(registrationId);
+      allow list: if true;
+      allow create: if isValidId(registrationId) && isValidRegistration(incoming());
+      allow update: if isValidId(registrationId) && isValidRegistration(incoming());
+      allow delete: if isValidId(registrationId);
+    }
+
+    // Event settings collection
+    match /event_settings/{settingsId} {
+      allow read: if isValidId(settingsId);
+      allow write: if isValidId(settingsId);
+    }
+
+    // Medical colleges collection
+    match /medical_colleges/{collegeId} {
+      allow read: if true;
+      allow write: if isValidId(collegeId);
+    }
+
+    // Admin profiles collection
+    match /admins/{userId} {
+      allow read, write: if isValidId(userId);
+    }
+  }
+}
