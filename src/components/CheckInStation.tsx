@@ -25,10 +25,10 @@ interface CheckInStationProps {
 }
 
 export const EVENT_VENUE_ADDRESS =
-  'STETH DAY 2026 Grand Convention Arena, Kerala NEET Academy Main Auditorium, Medical College Road, Kozhikode / Thrissur, Kerala - 673008';
+  '';
 
 export const EVENT_GATE_INFO =
-  'Gate 1 — Main Delegate Reception Desk & Stethoscope Kit Counter';
+  '';
 
 export const CheckInStation: React.FC<CheckInStationProps> = ({
   onBackToHome,

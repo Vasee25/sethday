@@ -397,6 +397,7 @@ export const MedicalCollegeSelector: React.FC<MedicalCollegeSelectorProps> = ({
                   className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 shadow-2xs"
                   autoComplete="off"
                   autoCorrect="off"
+
                   spellCheck="false"
                 />
                 {searchQuery && (
@@ -408,6 +409,32 @@ export const MedicalCollegeSelector: React.FC<MedicalCollegeSelectorProps> = ({
                     <X className="w-4 h-4" />
                   </button>
                 )}
+                          {searchQuery.trim() && (
+            <button
+              type="button"
+              onClick={() => {
+                onChange({
+                  id: -Date.now(),
+                  name: searchQuery.trim(),
+                  city: '',
+                  district: '',
+                  state: '',
+                  type: 'man
+                  npm runual',
+                });
+                setIsOpen(false);
+                setSearchQuery(''); 
+              }}
+              className="mx-3 mb-2 flex w-[calc(100%-1.5rem)] items-center gap-2 rounded-lg border border-dashed border-teal-300 bg-teal-50 px-3 py-2 text-left text-sm text-teal-900 hover:bg-teal-100"
+            >
+              <Building2 className="h-4 w-4 shrink-0" />
+              <span>
+                <span className="block font-semibold">Use “{searchQuery.trim()}”</span>
+                <span className="block text-xs text-teal-700">Add a college that is not in the list</span>
+              </span>
+            </button>
+          )}
+
               </div>
 
               {/* State Filter Chips & Dropdown */}
