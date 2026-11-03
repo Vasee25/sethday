@@ -348,16 +348,21 @@ export const WillingRegistrationForm: React.FC<WillingRegistrationFormProps> = (
               Student Full Name <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                value={formData.studentName}
-                onChange={(e) => setFormData({ ...formData, studentName: e.target.value })}
-                className={`w-full pl-10 pr-3 py-3 bg-white border-2 rounded-xl text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                  errors.studentName ? 'border-red-400 bg-red-50/20' : 'border-slate-300'
-                }`}
-              />
-            </div>
+  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+  <input
+    type="text"
+    value={formData.studentName}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        studentName: e.target.value.toUpperCase().replace(/[^A-Za-z]/g, ''),
+      })
+    }
+    className={`w-full pl-10 pr-3 py-3 bg-white border-2 rounded-xl text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+      errors.studentName ? 'border-red-400 bg-red-50/20' : 'border-slate-300'
+    }`}
+  />
+</div>
             {errors.studentName && (
               <p className="text-xs font-semibold text-red-600">{errors.studentName}</p>
             )}
