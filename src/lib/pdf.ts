@@ -383,8 +383,7 @@ export async function generateStudentPDF(
     '1. Present this official printed pass or show the digital PDF on your smartphone at the registration desk.',
     '2. White apron/coat distribution and ceremonial stethoscope presentation will be conducted as per schedule.',
     '3. Your allocated food tokens will be handed over along with the official delegate badge at entry.',
-    '4. Carry a valid government photo ID (Aadhaar / Voter ID / Passport) for identity verification.',
-    '5. In case of any corrections or assistance, contact Kerala NEET Academy helpline: +91 98470 12345.',
+        
   ];
   rules.forEach((rule, idx) => {
     doc.text(rule, 18, guidelinesY + 12 + (idx * 5));
@@ -398,7 +397,7 @@ export async function generateStudentPDF(
   doc.setFontSize(7.5);
   doc.setTextColor(241, 245, 249);
   doc.text(
-    settings?.pdfFooter || 'Kerala NEET Academy • stethday@keralaneetacademy.org • Call: +91 98470 12345',
+    settings?.pdfFooter || 'Kerala NEET Academy • wwww.keralaneetacademy.com • Call: +91 8098 12 8098',
     pageWidth / 2,
     pageHeight - 4.5,
     { align: 'center' }
