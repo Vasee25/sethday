@@ -1860,7 +1860,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
                 min={1}
                 max={20}
                 value={settings.maxFoodCount}
-                onChange={(e) => setSettings({ ...settings, maxFoodCount: parseInt(e.target.value) || 5 })}
+                onChange={(e) => setSettings({ ...settings, maxFoodCount: parseInt(e.target.value) || 100 })}
                 className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm"
               />
             </div>
