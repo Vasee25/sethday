@@ -41,31 +41,6 @@ import {
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-// ==================== CORS ====================
-// Allow the Vercel-hosted frontend to call this Render backend.
-// Set ALLOWED_ORIGINS env var on Render as a comma-separated list,
-// e.g. "https://knastethday.online,https://www.knastethday.online"
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
-  : [];
-
-app.use((req: Request, res: Response, next: Function) => {
-  const origin = req.headers.origin;
-  if (!origin || allowedOrigins.includes(origin)) {
-    if (origin) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Vary', 'Origin');
-    }
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With');
-  }
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-  next();
-});
-
 // Support larger payloads for student photos (base64 compressed)
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
@@ -1009,10 +984,10 @@ async function startServer() {
   const hasDist = fs.existsSync(path.join(distPath, 'index.html'));
   const isProduction =
     process.env.NODE_ENV === 'production' ||
-    Boolean(process.env.K_SERVICE && !process.env.K_SERVICE.startsWith('ais-dev')) ||
-    (hasDist && process.env.NODE_ENV !== 'development');
+    Boolean(process.env.K_SERVICE && !process.env.K_SERVICE.startsWith('ais-dev'));
 
   if (!isProduction) {
+    console.log('Mounting Vite middleware in development mode...');
     const vite = await createViteServer({
       server: {
         middlewareMode: true,
@@ -1022,19 +997,41 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'), (err) => {
-        if (err && !res.headersSent) {
-          res.status(500).send('Application loading error');
-        }
+    if (hasDist) {
+      console.log('Serving production static assets from dist/...');
+      app.use(express.static(distPath));
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(distPath, 'index.html'), (err) => {
+          if (err && !res.headersSent) {
+            res.status(500).send('Application loading error');
+          }
+        });
       });
-    });
+    } else {
+      console.warn('Production flag set but dist/index.html not found, falling back to Vite middleware');
+      const vite = await createViteServer({
+        server: {
+          middlewareMode: true,
+          hmr: false,
+        },
+        appType: 'spa',
+      });
+      app.use(vite.middlewares);
+    }
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`STETH DAY Server running on http://0.0.0.0:${PORT} (mode: ${isProduction ? 'production' : 'development'})`);
   });
+
+  server.on('error', (err: any) => {
+    console.error('Express server listen error:', err);
+  });
+
+  return server;
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error('Fatal error starting server:', err);
+  process.exit(1);
+});
