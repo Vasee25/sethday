@@ -14,12 +14,20 @@ export const KERALA_NEET_CAMPUSES: CampusLocationItem[] = [
 
   // --- Tirunelveli Branches ---
   {
-    id: 'tvl-dayscholar',
-    name: 'Tirunelveli - Dayscholar Campus',
+    id: 'tvl-dayscholar-1',
+    name: 'Tirunelveli - Dayscholar Campus 1',
     city: 'Tirunelveli',
     tag: 'Tirunelveli',
-    code: 'TVL-1',
-    keywords: ['tirunelveli', 'dayscholar', 'day scholar', 'campus', 'nellai', 'tvl', 'tvl-1', 'tvl 1', 'tvl1'],
+    code: 'DS-TVL-1',
+    keywords: ['tirunelveli', 'dayscholar', 'day scholar', 'campus', 'nellai', 'tvl', 'ds-tvl-1', 'ds tvl 1', 'dstvl1'],
+  },
+  {
+    id: 'tvl-dayscholar-2',
+    name: 'Tirunelveli - Dayscholar Campus 2',
+    city: 'Tirunelveli',
+    tag: 'Tirunelveli',
+    code: 'DS-TVL-2',
+    keywords: ['tirunelveli', 'dayscholar', 'day scholar', 'campus', 'nellai', 'tvl', 'ds-tvl-2', 'ds tvl 2', 'dstvl2'],
   },
   {
     id: 'tvl-rohini',
@@ -36,14 +44,6 @@ export const KERALA_NEET_CAMPUSES: CampusLocationItem[] = [
     tag: 'Tirunelveli',
     code: 'TVL-3',
     keywords: ['tirunelveli', 'jeba', 'garden', 'palayamkottai', 'bypass', 'tvl', 'tvl-3', 'tvl 3'],
-  },
-  {
-    id: 'tvl-campus6',
-    name: 'Tirunelveli - Campus 6',
-    city: 'Tirunelveli',
-    tag: 'Tirunelveli',
-    code: 'TVL-6',
-    keywords: ['tirunelveli', 'campus 6', 'campus-6', 'campus6', 'nellai', 'tvl', 'tvl-6', 'tvl 6', 'tvl6'],
   },
   {
     id: 'tvl-corp',
@@ -70,6 +70,14 @@ export const KERALA_NEET_CAMPUSES: CampusLocationItem[] = [
     tag: 'Regional',
     code: 'SVK',
     keywords: ['sivakasi', 'virudhunagar', 'sattur road', 'svk'],
+  },
+  {
+    id: 'tnk',
+    name: 'Tenkasi',
+    city: 'Tenkasi',
+    tag: 'Regional',
+    code: 'TNK',
+    keywords: ['tenkasi', 'Sakthi Nagar', 'New Bus Stand', 'tnk'],
   },
   {
     id: 'thn',
