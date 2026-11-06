@@ -84,7 +84,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
 
   // Generate Scannable QR Code pointing to student check-in gateway
   useEffect(() => {
-    const origin = window.location.origin || 'https://knastethday.online';
+    const origin = window.location.origin || 'http://localhost:3000';
     const targetUrl = `${origin}/?mode=checkin`;
     setCheckInUrl(targetUrl);
 
@@ -1858,8 +1858,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
               <input
                 type="number"
                 min={1}
-                max={20}
-                value={settings.maxFoodCount}
+                max={100}
+                value={settings.maxFoodCount ?? 100}
                 onChange={(e) => setSettings({ ...settings, maxFoodCount: parseInt(e.target.value) || 100 })}
                 className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm"
               />

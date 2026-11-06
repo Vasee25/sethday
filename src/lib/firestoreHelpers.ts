@@ -149,7 +149,7 @@ export async function initDatabase(): Promise<void> {
         codeDigits: 3,
         pdfHeader: 'KERALA NEET ACADEMY — STETH DAY 2026 OFFICIAL REGISTRATION PASS',
         pdfFooter: 'Kerala NEET Academy • stethday@keralaneetacademy.org • Call: +91 98470 12345',
-        maxFoodCount: 5,
+        maxFoodCount: 100,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -817,8 +817,8 @@ export async function getSettings(): Promise<any> {
     nextCodeNumber: 20,
     codeDigits: 3,
     pdfHeader: 'KERALA NEET ACADEMY — STETH DAY 2026 OFFICIAL REGISTRATION PASS',
-    pdfFooter: 'Kerala NEET Academy • stethday@keralaneetacademy.org • Call: +91 98470 12345',
-    maxFoodCount: 5,
+    pdfFooter: 'Kerala NEET Academy • stethday@keralaneetacademy.org • Call: +91 8098 12 8098',
+    maxFoodCount: 100,
   };
 }
 

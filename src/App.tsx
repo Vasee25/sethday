@@ -49,7 +49,7 @@ export default function App() {
   }>({
     academyName: 'Kerala NEET Academy',
     eventName: 'STETH DAY',
-    maxFoodCount: 5,
+    maxFoodCount: 100,
   });
 
   // Fetch settings and test Firebase on mount, plus parse QR link params
@@ -173,7 +173,7 @@ export default function App() {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             onSubmitSuccess={handleRegistrationSuccess}
-            maxFoodCount={eventSettings.maxFoodCount || 5}
+            maxFoodCount={eventSettings.maxFoodCount ?? 100}
           />
         )}
 

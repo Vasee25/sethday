@@ -187,7 +187,7 @@ app.get('/api/settings', async (req, res) => {
       eventName: settings?.eventName || 'STETH DAY',
       description: settings?.description || 'Your Journey Towards Medicine Starts Here',
       codePrefix: settings?.codePrefix || 'KNA',
-      maxFoodCount: settings?.maxFoodCount || 5,
+      maxFoodCount: settings?.maxFoodCount ?? 100,
     });
   } catch (error: any) {
     res.status(500).json({ error: 'Failed to fetch event settings' });
