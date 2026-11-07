@@ -383,6 +383,7 @@ export async function generateStudentPDF(
     '1. Present this official printed pass or show the digital PDF on your smartphone at the registration desk.',
     '2. White apron/coat distribution and ceremonial stethoscope presentation will be conducted as per schedule.',
     '3. Your allocated food tokens will be handed over along with the official delegate badge at entry.',
+    '4. If more people attend than the prescribed number, you will have to pay for the additional payment for food.',
         
   ];
   rules.forEach((rule, idx) => {
