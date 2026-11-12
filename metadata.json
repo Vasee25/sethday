@@ -1,0 +1,8 @@
+{
+  "name": "Kerala NEET Academy — STETH DAY Registration Portal",
+  "description": "Official student registration and enrollment portal for Kerala NEET Academy across Tirunelveli (Rohini Campus, Jeba Garden, Corporate Office), Nagercoil, Madurai, Sivakasi, Theni, Kadayanallur, Thoothukudi, Ramanathapuram, Thanjavur, and STETH DAY pass generation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
