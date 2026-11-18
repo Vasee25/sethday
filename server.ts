@@ -819,6 +819,7 @@ app.get('/api/admin/export/excel', requireAdmin, async (req, res) => {
       { header: 'Code / ID', key: 'codeId', width: 16 },
       { header: 'Student Photo', key: 'studentPhoto', width: 14 },
       { header: 'Student Name', key: 'studentName', width: 28 },
+      { header: 'NEET Mark', key: 'neetMark', width: 14 },
       { header: 'Contact Details', key: 'contactDetails', width: 28 },
       { header: 'Campus Branch', key: 'campusBranch', width: 24 },
       { header: 'College', key: 'college', width: 38 },
@@ -852,6 +853,11 @@ app.get('/api/admin/export/excel', requireAdmin, async (req, res) => {
       const contactParts = [r.contactNumber, r.email].filter((v) => typeof v === 'string' && v.trim());
       const contactText = contactParts.join('\n') || '—';
       const nameText = r.fatherName ? `${r.studentName || ''}\nS/o ${r.fatherName}` : (r.studentName || '');
+      const rawNeetMark = r.ntaScore !== undefined && r.ntaScore !== null ? r.ntaScore : r.nta_score;
+      const neetMarkValue =
+        rawNeetMark !== undefined && rawNeetMark !== null && rawNeetMark !== '' && !Number.isNaN(Number(rawNeetMark))
+          ? Number(rawNeetMark)
+          : '—';
       const photoSrc: string = r.photoUrl || r.photo_url || '';
 
       let embeddedImageId: number | null = null;
@@ -884,6 +890,7 @@ app.get('/api/admin/export/excel', requireAdmin, async (req, res) => {
         codeId: r.studentCode || r.responseId || '',
         studentPhoto: fallbackPhotoCellText,
         studentName: nameText,
+        neetMark: neetMarkValue,
         contactDetails: contactText,
         campusBranch: r.campusLocation || '—',
         college: r.medicalCollegeName || '—',
@@ -896,12 +903,15 @@ app.get('/api/admin/export/excel', requireAdmin, async (req, res) => {
       row.eachCell((cell, colNumber) => {
         cell.alignment = {
           vertical: 'middle',
-          horizontal: colNumber === 1 || colNumber === 2 || colNumber === 7 || colNumber === 8 ? 'center' : 'left',
+          horizontal:
+            colNumber === 1 || colNumber === 2 || colNumber === 4 || colNumber === 8 || colNumber === 9
+              ? 'center'
+              : 'left',
           wrapText: true,
         };
         cell.font = {
           size: 10,
-          bold: colNumber === 1 || colNumber === 7,
+          bold: colNumber === 1 || colNumber === 4 || colNumber === 8,
           color: { argb: colNumber === 1 ? 'FF0F766E' : 'FF1E293B' },
         };
         cell.border = {
