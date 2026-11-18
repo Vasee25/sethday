@@ -1,7 +1,8 @@
 import express, { type Request, type Response } from 'express';
 import path from 'path';
 import fs from 'fs';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import sharp from 'sharp';
 import { createServer as createViteServer } from 'vite';
 import {
   initDatabase,
@@ -419,6 +420,7 @@ app.get('/api/admin/registrations', requireAdmin, async (req, res) => {
     const willingness = req.query.willingness as string;
     const coatSize = req.query.coatSize as string;
     const campusLocation = req.query.campusLocation as string;
+    const collegeType = req.query.collegeType as string;
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 20;
 
@@ -427,6 +429,7 @@ app.get('/api/admin/registrations', requireAdmin, async (req, res) => {
       willingness,
       coatSize,
       campusLocation,
+      collegeType,
       page,
       pageSize,
     });
@@ -773,70 +776,159 @@ app.get('/api/admin/export/csv', requireAdmin, async (req, res) => {
   }
 });
 
-// Admin Export Excel (.xlsx format with styled sheet and columns)
+// Admin Export Excel (.xlsx format with styled sheet, filtered list, and embedded student photos)
 app.get('/api/admin/export/excel', requireAdmin, async (req, res) => {
   try {
-    const rows = await getAllRegistrationsForExport();
+    const search = req.query.search as string;
+    const willingness = req.query.willingness as string;
+    const coatSize = req.query.coatSize as string;
+    const campusLocation = req.query.campusLocation as string;
+    const collegeType = req.query.collegeType as string;
 
-    const formattedData = rows.map((r: any, idx: number) => {
-      const totalFood = (Number(r.foodVegCount) || 0) + (Number(r.foodNonVegCount) || 0);
-      return {
-        'S.No': idx + 1,
-        'Student Code': r.studentCode || 'N/A',
-        'Student Name': r.studentName || '',
-        "Father's Name": r.fatherName || '',
-        'Email ID': r.email || '',
-        'Contact Number': r.contactNumber || '',
-        'Campus Location': r.campusLocation || '',
-        'Course Program': r.courseProgram || '',
-        'Target Year': r.targetYear || '',
-        'Age': r.age ?? '',
-        'NTA Score': r.ntaScore ?? r.nta_score ?? '',
-        'Medical College': r.medicalCollegeName || '',
-        'College State': r.medicalCollegeState || '',
-        'Veg Meals': r.foodVegCount ?? 0,
-        'Non-Veg Meals': r.foodNonVegCount ?? 0,
-        'Total Meals': totalFood,
-        'Coat / Apron Size': r.coatSize || '',
-        'Willingness Status': r.willingness || 'ATTENDING',
-        'Registration Date': r.createdAt ? new Date(r.createdAt).toLocaleString('en-IN') : '',
-        'Response ID': r.responseId || '',
+    const hasFilters = Boolean(
+      (search && search.trim()) ||
+      (willingness && willingness !== 'ALL') ||
+      (coatSize && coatSize !== 'ALL') ||
+      (campusLocation && campusLocation !== 'ALL') ||
+      (collegeType && collegeType !== 'ALL')
+    );
+
+    const rows = hasFilters || req.query.page !== undefined || req.query.search !== undefined
+      ? (
+          await getRegistrationsList({
+            search,
+            willingness,
+            coatSize,
+            campusLocation,
+            collegeType,
+            page: 1,
+            pageSize: 10000,
+          })
+        ).items
+      : await getAllRegistrationsForExport();
+
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'STETH DAY 2026 — Admin Command';
+    workbook.created = new Date();
+
+    const worksheet = workbook.addWorksheet('Student Records', {
+      views: [{ state: 'frozen', ySplit: 1 }],
+    });
+
+    worksheet.columns = [
+      { header: 'Code / ID', key: 'codeId', width: 16 },
+      { header: 'Student Photo', key: 'studentPhoto', width: 14 },
+      { header: 'Student Name', key: 'studentName', width: 28 },
+      { header: 'Contact Details', key: 'contactDetails', width: 28 },
+      { header: 'Campus Branch', key: 'campusBranch', width: 24 },
+      { header: 'College', key: 'college', width: 38 },
+      { header: 'Coat Size', key: 'coatSize', width: 12 },
+      { header: 'Meals', key: 'meals', width: 16 },
+    ];
+
+    const headerRow = worksheet.getRow(1);
+    headerRow.height = 28;
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF0F766E' },
+      };
+      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FF0D9488' } },
+        bottom: { style: 'medium', color: { argb: 'FF115E59' } },
+        left: { style: 'thin', color: { argb: 'FF0D9488' } },
+        right: { style: 'thin', color: { argb: 'FF0D9488' } },
       };
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    for (let i = 0; i < rows.length; i++) {
+      const r: any = rows[i];
+      const veg = Number(r.foodVegCount) || 0;
+      const nonVeg = Number(r.foodNonVegCount) || 0;
+      const mealsText = veg > 0 || nonVeg > 0 ? `${veg}V / ${nonVeg}NV` : '—';
+      const contactParts = [r.contactNumber, r.email].filter((v) => typeof v === 'string' && v.trim());
+      const contactText = contactParts.join('\n') || '—';
+      const nameText = r.fatherName ? `${r.studentName || ''}\nS/o ${r.fatherName}` : (r.studentName || '');
+      const photoSrc: string = r.photoUrl || r.photo_url || '';
 
-    // Auto-fit column widths
-    worksheet['!cols'] = [
-      { wch: 6 },  // S.No
-      { wch: 15 }, // Student Code
-      { wch: 24 }, // Student Name
-      { wch: 20 }, // Father Name
-      { wch: 26 }, // Email
-      { wch: 16 }, // Contact
-      { wch: 18 }, // Campus
-      { wch: 18 }, // Course
-      { wch: 12 }, // Target Year
-      { wch: 8 },  // Age
-      { wch: 32 }, // Medical College
-      { wch: 16 }, // College State
-      { wch: 12 }, // Veg
-      { wch: 14 }, // Non-Veg
-      { wch: 12 }, // Total Meals
-      { wch: 16 }, // Coat Size
-      { wch: 18 }, // Status
-      { wch: 22 }, // Date
-      { wch: 20 }, // Response ID
-    ];
+      let embeddedImageId: number | null = null;
+      let fallbackPhotoCellText = 'No Photo';
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
+      if (photoSrc && typeof photoSrc === 'string') {
+        const base64Match = photoSrc.match(/^data:image\/[a-zA-Z0-9+.-]+;base64,(.+)$/);
+        if (base64Match && base64Match[1]) {
+          try {
+            const rawBuffer = Buffer.from(base64Match[1], 'base64');
+            const thumbBuffer = await sharp(rawBuffer)
+              .resize(76, 94, { fit: 'cover' })
+              .jpeg({ quality: 80 })
+              .toBuffer();
 
-    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+            embeddedImageId = workbook.addImage({
+              buffer: thumbBuffer as any,
+              extension: 'jpeg',
+            });
+            fallbackPhotoCellText = '';
+          } catch (imgErr) {
+            fallbackPhotoCellText = 'Photo Unavailable';
+          }
+        } else if (photoSrc.startsWith('http://') || photoSrc.startsWith('https://')) {
+          fallbackPhotoCellText = photoSrc;
+        }
+      }
+
+      const row = worksheet.addRow({
+        codeId: r.studentCode || r.responseId || '',
+        studentPhoto: fallbackPhotoCellText,
+        studentName: nameText,
+        contactDetails: contactText,
+        campusBranch: r.campusLocation || '—',
+        college: r.medicalCollegeName || '—',
+        coatSize: r.coatSize || '—',
+        meals: mealsText,
+      });
+
+      row.height = embeddedImageId !== null ? 54 : 30;
+
+      row.eachCell((cell, colNumber) => {
+        cell.alignment = {
+          vertical: 'middle',
+          horizontal: colNumber === 1 || colNumber === 2 || colNumber === 7 || colNumber === 8 ? 'center' : 'left',
+          wrapText: true,
+        };
+        cell.font = {
+          size: 10,
+          bold: colNumber === 1 || colNumber === 7,
+          color: { argb: colNumber === 1 ? 'FF0F766E' : 'FF1E293B' },
+        };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          right: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        };
+      });
+
+      if (embeddedImageId !== null) {
+        worksheet.addImage(embeddedImageId, {
+          tl: { col: 1.18, row: i + 1.08 },
+          ext: { width: 46, height: 58 },
+          editAs: 'oneCell',
+        });
+      }
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', `attachment; filename="KNA_STETH_DAY_Registrations_${Date.now()}.xlsx"`);
-    res.send(buffer);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="KNA_STETH_DAY_Student_Records_${new Date().toISOString().split('T')[0]}.xlsx"`
+    );
+    res.send(Buffer.from(buffer));
   } catch (error: any) {
     console.error('Failed to export Excel:', error);
     res.status(500).json({ error: 'Failed to export Excel: ' + (error.message || '') });

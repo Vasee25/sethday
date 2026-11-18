@@ -1,8 +1,15 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, doc, getDocFromServer, setDoc, getDoc, collection, onSnapshot, query, orderBy, deleteDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDocFromServer, setDoc, getDoc, collection, onSnapshot, query, orderBy, deleteDoc, setLogLevel } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import firebaseConfig from '../../firebase-applet-config.json' with { type: 'json' };
 import type { RegistrationRecord } from '../types.ts';
+
+// Set Firestore log level to silent to prevent internal gRPC idle stream cleanup notices from logging to error console
+try {
+  setLogLevel('silent');
+} catch {
+  // Ignore in environments where setLogLevel is unavailable
+}
 
 // Initialize Firebase App
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -172,6 +179,14 @@ export function subscribeToFirestoreRegistrations(onUpdate: (registrations: any[
         onUpdate(items);
       },
       (err) => {
+        // Disconnecting idle streams or cancelled stream timeouts are standard transport behavior
+        if (
+          err.message?.includes('Disconnecting idle stream') ||
+          err.message?.includes('Timed out waiting for new targets') ||
+          (err as any)?.code === 'cancelled'
+        ) {
+          return;
+        }
         console.warn('Firestore subscription notice:', err.message);
       }
     );

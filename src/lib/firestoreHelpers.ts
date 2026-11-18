@@ -606,6 +606,66 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   };
 }
 
+function matchesCollegeType(rawType: string | null | undefined, filterType: string): boolean {
+  if (!filterType || filterType === 'ALL') return true;
+  const t = (rawType || '').trim().toLowerCase();
+  const f = filterType.trim().toLowerCase();
+  if (!t) return false;
+
+  if (f === 'government') return t.includes('government') || t.includes('govt');
+  if (f === 'dental (bds)') return t.includes('dental') || t.includes('bds');
+  if (f === 'private') return t.includes('private');
+  if (f === 'aiims') return t.includes('aiims') || t.includes('central') || t.includes('ini') || t.includes('autonomous');
+  if (f === 'trust') return t.includes('trust') || t.includes('society');
+  if (f === 'deemed') return t.includes('deemed');
+  return t.includes(f);
+}
+
+function resolveCollegeTypeForRegistration(
+  r: RegistrationRecord,
+  byName: Map<string, string>,
+  byId: Map<number, string>
+): string | null {
+  const explicitType = (r as any).medicalCollegeType;
+  if (typeof explicitType === 'string' && explicitType.trim()) {
+    return explicitType.trim();
+  }
+
+  const collegeName = (r.medicalCollegeName || '').trim();
+  const normalizedName = collegeName.toLowerCase();
+
+  if (normalizedName && byName.has(normalizedName)) {
+    return byName.get(normalizedName) || null;
+  }
+
+  if (r.medicalCollegeId && byId.has(Number(r.medicalCollegeId))) {
+    return byId.get(Number(r.medicalCollegeId)) || null;
+  }
+
+  if (normalizedName) {
+    const partial = cachedColleges.find(
+      (c) =>
+        c.name.toLowerCase().includes(normalizedName) ||
+        normalizedName.includes(c.name.toLowerCase()) ||
+        (c.aliases &&
+          c.aliases
+            .toLowerCase()
+            .split(',')
+            .some((al) => al.trim() && normalizedName.includes(al.trim())))
+    );
+    if (partial?.type) return partial.type;
+
+    if (normalizedName.includes('aiims')) return 'AIIMS';
+    if (normalizedName.includes('dental') || normalizedName.includes('bds')) return 'Dental (BDS)';
+    if (normalizedName.includes('deemed')) return 'Deemed';
+    if (normalizedName.includes('trust') || normalizedName.includes('society')) return 'Trust';
+    if (normalizedName.includes('government') || normalizedName.includes('govt')) return 'Government';
+    if (normalizedName.includes('private')) return 'Private';
+  }
+
+  return null;
+}
+
 /**
  * Lists registrations with search, filtering, and pagination from Firestore
  */
@@ -615,6 +675,7 @@ export async function getRegistrationsList(params: {
   willingness?: string;
   checkInStatus?: string;
   campusLocation?: string;
+  collegeType?: string;
   courseProgram?: string;
   coatSize?: string;
   search?: string;
@@ -647,6 +708,19 @@ export async function getRegistrationsList(params: {
 
   if (params.campusLocation && params.campusLocation !== 'ALL') {
     items = items.filter((r) => (r.campusLocation || '').toLowerCase().includes(params.campusLocation!.toLowerCase()));
+  }
+
+  if (params.collegeType && params.collegeType !== 'ALL') {
+    await initMedicalColleges();
+    const byName = new Map<string, string>();
+    const byId = new Map<number, string>();
+    for (const c of cachedColleges) {
+      if (c.name && c.type) byName.set(c.name.trim().toLowerCase(), c.type);
+      if (c.id && c.type) byId.set(Number(c.id), c.type);
+    }
+    items = items.filter((r) =>
+      matchesCollegeType(resolveCollegeTypeForRegistration(r, byName, byId), params.collegeType!)
+    );
   }
 
   if (params.courseProgram && params.courseProgram !== 'ALL') {
@@ -916,8 +990,10 @@ export async function adminLogin(email: string, passwordPlain: string): Promise<
 export interface SearchCollegesOptions {
   search?: string;
   state?: string;
+  type?: string;
   page?: number;
   limit?: number;
+  pageSize?: number;
 }
 
 export interface CollegeSearchResult {
@@ -938,9 +1014,14 @@ export async function getMedicalColleges(options: SearchCollegesOptions = {}): P
   let results = [...cachedColleges];
   const search = (options.search || '').trim().toLowerCase();
   const stateFilter = (options.state || '').trim();
+  const typeFilter = (options.type || '').trim();
 
   if (stateFilter && stateFilter !== 'ALL') {
     results = results.filter((c) => c.state.toLowerCase() === stateFilter.toLowerCase());
+  }
+
+  if (typeFilter && typeFilter !== 'ALL') {
+    results = results.filter((c) => matchesCollegeType(c.type, typeFilter));
   }
 
   if (search) {
@@ -955,7 +1036,7 @@ export async function getMedicalColleges(options: SearchCollegesOptions = {}): P
   }
 
   const page = Math.max(1, options.page || 1);
-  const limitCount = Math.min(100, Math.max(1, options.limit || 30));
+  const limitCount = Math.min(100, Math.max(1, options.limit || options.pageSize || 30));
   const total = results.length;
   const totalPages = Math.ceil(total / limitCount) || 1;
   const start = (page - 1) * limitCount;

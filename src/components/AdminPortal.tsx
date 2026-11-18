@@ -137,6 +137,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
   const [willingFilter, setWillingFilter] = useState('ALL');
   const [coatFilter, setCoatFilter] = useState('ALL');
   const [campusFilter, setCampusFilter] = useState('ALL');
+  const [collegeTypeFilter, setCollegeTypeFilter] = useState('ALL');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -223,12 +224,22 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
   // Excel & CSV Export handling
   const [exportingExcel, setExportingExcel] = useState(false);
   const [exportingCsv, setExportingCsv] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const handleExportExcel = async () => {
     try {
       setExportingExcel(true);
+      setExportError(null);
       const token = authToken || sessionStorage.getItem('kna_admin_token') || '';
-      const url = `/api/admin/export/excel?token=${encodeURIComponent(token)}`;
+      const params = new URLSearchParams({
+        token,
+        search: searchQuery,
+        willingness: willingFilter,
+        coatSize: coatFilter,
+        ...(campusFilter !== 'ALL' ? { campusLocation: campusFilter } : {}),
+        ...(collegeTypeFilter !== 'ALL' ? { collegeType: collegeTypeFilter } : {}),
+      });
+      const url = `/api/admin/export/excel?${params.toString()}`;
       const res = await fetch(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -242,14 +253,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = downloadUrl;
-      a.download = `KNA_STETH_DAY_Registrations_${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.download = `KNA_STETH_DAY_Student_Records_${new Date().toISOString().split('T')[0]}.xlsx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(downloadUrl);
     } catch (err: any) {
       console.error('Failed to export Excel:', err);
-      alert('Error exporting Excel: ' + (err.message || 'Unknown error'));
+      setExportError('Error exporting Excel: ' + (err.message || 'Unknown error'));
+      setTimeout(() => setExportError(null), 5000);
     } finally {
       setExportingExcel(false);
     }
@@ -355,6 +367,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
         willingness: willingFilter,
         coatSize: coatFilter,
         ...(campusFilter !== 'ALL' ? { campusLocation: campusFilter } : {}),
+        ...(collegeTypeFilter !== 'ALL' ? { collegeType: collegeTypeFilter } : {}),
       });
       const res = await fetch(`/api/admin/registrations?${queryParams.toString()}`, {
         headers: { Authorization: `Bearer ${authToken}` },
@@ -590,7 +603,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
     if (authToken && activeTab === 'students') {
       loadStudents();
     }
-  }, [page, willingFilter, coatFilter, campusFilter]);
+  }, [page, willingFilter, coatFilter, campusFilter, collegeTypeFilter, activeTab]);
 
   // Handle Search Debounce
   useEffect(() => {
@@ -1039,7 +1052,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
                       </span>
                     </div>
                     <div className="text-3xl sm:text-4xl font-extrabold text-amber-900 mt-2">
-                      {totalWillingAttendees - totalCheckedIn}
+                      {totalPending}
                     </div>
                   </div>
                   <div className="mt-3 pt-2 border-t border-amber-100 flex items-center justify-between text-[11px] text-amber-800">
@@ -1521,7 +1534,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
                 <span className="text-slate-500 font-semibold text-xs">Status:</span>
                 <select
                   value={willingFilter}
-                  onChange={(e) => setWillingFilter(e.target.value)}
+                  onChange={(e) => {
+                    setWillingFilter(e.target.value);
+                    setPage(1);
+                  }}
                   className="h-8 px-2.5 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-xs text-slate-700 leading-normal focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
                   <option value="ALL">All Responses</option>
@@ -1534,7 +1550,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
                 <span className="text-slate-500 font-semibold text-xs">Coat Size:</span>
                 <select
                   value={coatFilter}
-                  onChange={(e) => setCoatFilter(e.target.value)}
+                  onChange={(e) => {
+                    setCoatFilter(e.target.value);
+                    setPage(1);
+                  }}
                   className="h-8 px-2.5 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-xs text-slate-700 leading-normal focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
                   <option value="ALL">All Sizes</option>
@@ -1548,7 +1567,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
                 <span className="text-slate-500 font-semibold text-xs">Campus:</span>
                 <select
                   value={campusFilter}
-                  onChange={(e) => setCampusFilter(e.target.value)}
+                  onChange={(e) => {
+                    setCampusFilter(e.target.value);
+                    setPage(1);
+                  }}
                   className="h-8 px-2.5 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-xs text-slate-700 max-w-[210px] leading-normal focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
                   <option value="ALL">All Campuses ({KERALA_NEET_CAMPUSES.length})</option>
@@ -1569,7 +1591,43 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
                 </select>
               </div>
 
-              <div className="ml-auto">
+              <div className="flex items-center space-x-1.5">
+                <span className="text-slate-500 font-semibold text-xs">College Type:</span>
+                <select
+                  value={collegeTypeFilter}
+                  onChange={(e) => {
+                    setCollegeTypeFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  aria-label="College Type"
+                  className="h-8 px-2.5 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-xs text-slate-700 leading-normal focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  <option value="ALL">All College Types</option>
+                  <option value="Government">Government</option>
+                  <option value="Dental (BDS)">Dental (B.D.S.)</option>
+                  <option value="Private">Private</option>
+                  <option value="AIIMS">AIIMS / Central</option>
+                  <option value="Trust">Trust / Society</option>
+                  <option value="Deemed">Deemed University</option>
+                </select>
+              </div>
+
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportExcel}
+                  disabled={exportingExcel || studentsLoading}
+                  className="h-8 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 disabled:opacity-50 text-white font-bold text-xs rounded-lg transition flex items-center space-x-1.5 shadow-2xs cursor-pointer"
+                  title="Export filtered student list to Excel (.xlsx)"
+                >
+                  {exportingExcel ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                  )}
+                  <span>{exportingExcel ? 'Exporting...' : 'Export Excel'}</span>
+                </button>
+
                 <button
                   onClick={() => loadStudents()}
                   className="h-8 w-8 flex items-center justify-center hover:bg-slate-100 rounded-lg text-slate-500 transition"
@@ -1579,6 +1637,22 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
                 </button>
               </div>
             </div>
+
+            {exportError && (
+              <div className="p-2.5 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-semibold flex items-center justify-between">
+                <span className="flex items-center space-x-1.5">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  <span>{exportError}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setExportError(null)}
+                  className="text-red-500 hover:text-red-700 p-0.5"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Student Records List */}
@@ -1729,7 +1803,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToPortal, onLogo
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={7} className="text-center py-8 text-slate-400">
+                      <td colSpan={8} className="text-center py-8 text-slate-400">
                         No student registrations match the selected filters.
                       </td>
                     </tr>
